@@ -1,0 +1,6 @@
+openapi: 3.0.3
+info:
+  title: Lets go chat
+  description: Vetal4ik lets go chat
+  version: 1.0.0
+paths:
