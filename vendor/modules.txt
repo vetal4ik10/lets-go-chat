@@ -1,5 +1,2 @@
-# github.com/vetal4ik10/hasher v1.1.0
-github.com/vetal4ik10/hasher
-# golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
-golang.org/x/crypto/bcrypt
-golang.org/x/crypto/blowfish
+# github.com/google/uuid v1.3.0
+github.com/google/uuid

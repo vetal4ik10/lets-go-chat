@@ -1,3 +1,5 @@
+github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
+github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/vetal4ik10/hasher v1.1.0 h1:UnVCI/ur8/YSZlXgT+Ji/74QJPTcyoTpWyFuFa6Lcx4=
 github.com/vetal4ik10/hasher v1.1.0/go.mod h1:8drbJiirU9mJ4ZFgSjw5nNDuaSPMwhN7T2gKQHwHp+E=
 golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 h1:7I4JAnoQBe7ZtJcBaYHi5UtiO8tQHbUSXxL+pnGRANg=
