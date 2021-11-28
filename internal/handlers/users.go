@@ -3,9 +3,12 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/vetal4ik10/hasher"
 	"github.com/vetal4ik10/lets-go-chat/internal/models"
 	"github.com/vetal4ik10/lets-go-chat/internal/reposetories"
+	"github.com/vetal4ik10/lets-go-chat/pkdg/onetimetoken"
 	"net/http"
 )
 
@@ -26,11 +29,6 @@ func (uH *UserHandlers) validateUser(user *createUserRequest) error {
 		return errors.New("user is already exist")
 	}
 	return nil
-}
-
-type createUserRequest struct {
-	UserName string `json:"userName"`
-	Password string	`json:"password"`
 }
 
 func (uH *UserHandlers) UserCreate(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +73,7 @@ type loginRequest struct {
 	Password string	`json:"password"`
 }
 
-func (uH *UserHandlers) Login(w http.ResponseWriter, r *http.Request) {
+func (uH *UserHandlers) Login(tM *onetimetoken.TokenManager, w http.ResponseWriter, r *http.Request) {
 	var loginRequest loginRequest
 
 	// Parse post body.
@@ -95,7 +93,18 @@ func (uH *UserHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Rate-Limit", "10")
 	w.Header().Set("X-Expires-After", "10")
-	response := map[string]string{"url": "ws://fancy-chat.io/ws&token=one-time-token"}
+
+	t, _ := tM.NewToken(user)
+
+
+	t, _ = tM.InitToken(t.Secret)
+
+	v := tM.Verified(t)
+	fmt.Println(v)
+
+	tM.Remove(t)
+
+	response := map[string]string{"token": t.Secret}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -104,4 +113,10 @@ func (uH *UserHandlers) UserList(w http.ResponseWriter, r *http.Request) {
 	user, _ := uH.repo.GetByUserName("test")
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
+}
+
+
+func (uH *UserHandlers) User(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	fmt.Println(vars)
 }

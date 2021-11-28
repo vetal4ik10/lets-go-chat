@@ -42,9 +42,28 @@ func (u *user) GetByUserName(username string) (*models.User, error) {
 	return &user, err
 }
 
+func (u *user) GetByUid(uid string) (*models.User, error) {
+	sqlStatement := "SELECT uid, name, pass FROM users WHERE uid=$1"
+	rows, err := u.db.Query(sqlStatement, uid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var user models.User
+	rows.Next()
+	err = rows.Scan(&user.Uid, &user.UserName, &user.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, err
+}
+
 type UserRepo interface {
 	Create(user *models.User) error
 	GetByUserName(username string) (*models.User, error)
+	GetByUid(uid string) (*models.User, error)
 }
 
 func NewUserRepo(db *sql.DB) UserRepo {
