@@ -1,22 +1,19 @@
 package main
 
 import (
-	"github.com/vetal4ik10/lets-go-chat/internal/endpoints"
+	"github.com/gorilla/mux"
+	"github.com/vetal4ik10/lets-go-chat/configs"
+	"github.com/vetal4ik10/lets-go-chat/internal/handlers"
 	"log"
 	"net/http"
-	"os"
 )
 
 func main() {
-	port := os.Getenv("PORT")
+	//.Headers("Content-Type", "application/json")
 
-	if port == "" {
-		log.Fatal("$PORT must be set")
-	}
-
-
-	http.HandleFunc("/user", endpoints.UserCreate)
-	http.HandleFunc("/user/list", endpoints.UserList)
-	http.HandleFunc("/user/login", endpoints.Login)
-	log.Fatal(http.ListenAndServe(":" + port, nil))
+	r := mux.NewRouter()
+	r.HandleFunc("/user", handlers.UserCreate).Methods("POST")
+	r.HandleFunc("/user/login", handlers.Login).Methods("POST")
+	r.HandleFunc("/user/list", handlers.UserList).Methods("GET")
+	log.Fatal(http.ListenAndServe(":"+configs.GetServerPort(), r))
 }
