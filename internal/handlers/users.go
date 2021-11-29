@@ -31,20 +31,25 @@ func (uH *UserHandlers) validateUser(user *createUserRequest) error {
 	return nil
 }
 
+type createUserRequest struct {
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+}
+
 func (uH *UserHandlers) UserCreate(w http.ResponseWriter, r *http.Request) {
 	var userRequest createUserRequest
 
 	// Parse post body.
 	err := json.NewDecoder(r.Body).Decode(&userRequest)
 	if err != nil {
-		http.Error(w, "Bad request, empty username or password", http.StatusBadRequest)
+		ErrorResponse(w, "Bad request, empty username or password", http.StatusBadRequest)
 		return
 	}
 
 	// Validate new user.
 	err = uH.validateUser(&userRequest)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ErrorResponse(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -54,7 +59,7 @@ func (uH *UserHandlers) UserCreate(w http.ResponseWriter, r *http.Request) {
 		Password: userRequest.Password,
 	}
 
-	err = uH.repo.Create(user);
+	err = uH.repo.Create(user)
 	// Create new user.
 	if err == nil {
 		w.Header().Set("Content-Type", "application/json")
@@ -63,14 +68,13 @@ func (uH *UserHandlers) UserCreate(w http.ResponseWriter, r *http.Request) {
 		response := map[string]string{"id": u.Uid, "userName": u.UserName}
 		json.NewEncoder(w).Encode(response)
 	} else {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		ErrorResponse(w, err.Error(), http.StatusBadRequest)
 	}
 }
 
-
 type loginRequest struct {
 	UserName string `json:"userName"`
-	Password string	`json:"password"`
+	Password string `json:"password"`
 }
 
 func (uH *UserHandlers) Login(tM *onetimetoken.TokenManager, w http.ResponseWriter, r *http.Request) {
@@ -79,13 +83,13 @@ func (uH *UserHandlers) Login(tM *onetimetoken.TokenManager, w http.ResponseWrit
 	// Parse post body.
 	err := json.NewDecoder(r.Body).Decode(&loginRequest)
 	if err != nil {
-		http.Error(w, "Bad request, empty username or password", http.StatusBadRequest)
+		ErrorResponse(w, "Bad request, empty username or password", http.StatusBadRequest)
 		return
 	}
 
 	user, err := uH.repo.GetByUserName(loginRequest.UserName)
 	if err != nil || !hasher.CheckPasswordHash(loginRequest.Password, user.Password) {
-		http.Error(w, "User name or password is incorrect.", http.StatusBadRequest)
+		ErrorResponse(w, "User name or password is incorrect.", http.StatusBadRequest)
 		return
 	}
 
@@ -95,16 +99,7 @@ func (uH *UserHandlers) Login(tM *onetimetoken.TokenManager, w http.ResponseWrit
 	w.Header().Set("X-Expires-After", "10")
 
 	t, _ := tM.NewToken(user)
-
-
-	t, _ = tM.InitToken(t.Secret)
-
-	v := tM.Verified(t)
-	fmt.Println(v)
-
-	tM.Remove(t)
-
-	response := map[string]string{"token": t.Secret}
+	response := map[string]string{"url": "/chat/ws.rtm.start?token=" + t.GetSecret()}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -114,7 +109,6 @@ func (uH *UserHandlers) UserList(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
 }
-
 
 func (uH *UserHandlers) User(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

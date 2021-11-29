@@ -69,4 +69,3 @@ type UserRepo interface {
 func NewUserRepo(db *sql.DB) UserRepo {
 	return &user{db: db}
 }
-
