@@ -10,15 +10,16 @@ import (
 )
 
 type chatHandlers struct {
-	tM *onetimetoken.TokenManager
+	tM onetimetoken.TokenManager
 	cS chat.ChatServer
 }
 
-func NewChatHandlers(tm *onetimetoken.TokenManager, ch chat.ChatServer) *chatHandlers {
+func NewChatHandlers(tm onetimetoken.TokenManager, ch chat.ChatServer) *chatHandlers {
 	return &chatHandlers{tm, ch}
 }
 
 func (cH *chatHandlers) ChatStart(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 	http.ServeFile(w, r, "home.html")
 }
 

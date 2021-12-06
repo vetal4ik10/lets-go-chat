@@ -7,16 +7,23 @@ import (
 	"github.com/vetal4ik10/lets-go-chat/internal/reposetories"
 )
 
-type TokenManager struct {
+type TokenManager interface {
+	InitToken(s string) (Token, error)
+	NewToken(u *models.User) (Token, error)
+	Verified(t Token) bool
+	Remove(t Token) error
+}
+
+type tokenManager struct {
 	db       *sql.DB
 	userRepo reposetories.UserRepo
 }
 
-func NewTokenManager(db *sql.DB, userRepo reposetories.UserRepo) *TokenManager {
-	return &TokenManager{db, userRepo}
+func NewTokenManager(db *sql.DB, userRepo reposetories.UserRepo) *tokenManager {
+	return &tokenManager{db, userRepo}
 }
 
-func (tM *TokenManager) InitToken(s string) (*token, error) {
+func (tM *tokenManager) InitToken(s string) (Token, error) {
 	sqlStatement := "SELECT uid, secret FROM token WHERE secret=$1"
 	rows, err := tM.db.Query(sqlStatement, s)
 	if err != nil {
@@ -36,10 +43,9 @@ func (tM *TokenManager) InitToken(s string) (*token, error) {
 	return &token{u, s, tM}, nil
 }
 
-func (tM *TokenManager) NewToken(u *models.User) (*token, error) {
+func (tM *tokenManager) NewToken(u *models.User) (Token, error) {
 	s := uuid.New().String()
-	sqlStatement := `INSERT INTO token (uid, secret)
-		VALUES ($1, $2)`
+	sqlStatement := `INSERT INTO token (uid, secret) VALUES ($1, $2)`
 	_, err := tM.db.Exec(sqlStatement, u.Uid, s)
 	if err != nil {
 		return nil, err
@@ -47,7 +53,7 @@ func (tM *TokenManager) NewToken(u *models.User) (*token, error) {
 	return &token{user: u, secret: s, tM: tM}, nil
 }
 
-func (tM *TokenManager) Verified(t *token) bool {
+func (tM *tokenManager) Verified(t Token) bool {
 	sqlStatement := "SELECT uid FROM token WHERE uid=$1 AND secret=$2"
 	rows, err := tM.db.Query(sqlStatement, t.GetUser().Uid, t.GetSecret())
 	defer rows.Close()
@@ -65,7 +71,7 @@ func (tM *TokenManager) Verified(t *token) bool {
 	return exists != ""
 }
 
-func (tM *TokenManager) Remove(t *token) error {
+func (tM *tokenManager) Remove(t Token) error {
 	sqlStatement := "DELETE FROM token WHERE secret=$1"
 	_, err := tM.db.Exec(sqlStatement, t.GetSecret())
 	if err != nil {

@@ -4,16 +4,20 @@ import (
 	"github.com/vetal4ik10/lets-go-chat/internal/models"
 )
 
-type token struct {
-	user   *models.User
-	secret string
-	tM 		 *TokenManager
-}
-
 type Token interface {
 	GetUser() *models.User
 	GetSecret() string
-	Remove()
+	Remove() error
+}
+
+type token struct {
+	user   *models.User
+	secret string
+	tM     TokenManager
+}
+
+func NewToken(user *models.User, secret string, tM TokenManager) *token {
+	return &token{user, secret, tM}
 }
 
 func (t *token) GetUser() *models.User {
@@ -24,6 +28,7 @@ func (t *token) GetSecret() string {
 	return t.secret
 }
 
-func (t *token) Remove() {
-	t.tM.Remove(t)
+func (t *token) Remove() error {
+	err := t.tM.Remove(t)
+	return err
 }
