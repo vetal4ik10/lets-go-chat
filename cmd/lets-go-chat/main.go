@@ -39,7 +39,6 @@ func main() {
 	r.Use(middlewares.RequestLoggingHandler)
 	r.Use(middlewares.RequestErrorLoggingHandler)
 	r.HandleFunc("/user", userH.UserCreate).Methods(http.MethodPost)
-	r.HandleFunc("/user/list", userH.UserList).Methods(http.MethodGet)
 	r.HandleFunc("/user/login", func(w http.ResponseWriter, r *http.Request) {
 		userH.Login(tM, w, r)
 	}).Methods(http.MethodPost)

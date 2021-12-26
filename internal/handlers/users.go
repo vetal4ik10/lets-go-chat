@@ -3,8 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"github.com/gorilla/mux"
 	"github.com/vetal4ik10/hasher"
 	"github.com/vetal4ik10/lets-go-chat/internal/models"
 	"github.com/vetal4ik10/lets-go-chat/internal/reposetories"
@@ -77,7 +75,7 @@ type loginRequest struct {
 	Password string `json:"password"`
 }
 
-func (uH *UserHandlers) Login(tM *onetimetoken.TokenManager, w http.ResponseWriter, r *http.Request) {
+func (uH *UserHandlers) Login(tM onetimetoken.TokenManager, w http.ResponseWriter, r *http.Request) {
 	var loginRequest loginRequest
 
 	// Parse post body.
@@ -101,16 +99,4 @@ func (uH *UserHandlers) Login(tM *onetimetoken.TokenManager, w http.ResponseWrit
 	t, _ := tM.NewToken(user)
 	response := map[string]string{"url": "/chat/ws.rtm.start?token=" + t.GetSecret()}
 	json.NewEncoder(w).Encode(response)
-}
-
-func (uH *UserHandlers) UserList(w http.ResponseWriter, r *http.Request) {
-	uH.repo.Create(&models.User{UserName: "test", Password: "test"})
-	user, _ := uH.repo.GetByUserName("test")
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
-}
-
-func (uH *UserHandlers) User(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	fmt.Println(vars)
 }
