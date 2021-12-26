@@ -6,6 +6,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/vetal4ik10/lets-go-chat/configs"
 	"github.com/vetal4ik10/lets-go-chat/internal/chat"
+	"github.com/vetal4ik10/lets-go-chat/internal/chat_message"
 	"github.com/vetal4ik10/lets-go-chat/internal/handlers"
 	"github.com/vetal4ik10/lets-go-chat/internal/reposetories"
 	"github.com/vetal4ik10/lets-go-chat/pkdg/middlewares"
@@ -27,10 +28,11 @@ func initDatabase() *sql.DB {
 
 func main() {
 	// Dependencies.
-	db := initDatabase()                             // Database
-	userRepo := reposetories.NewUserRepo(db)         // User repository for working with user.
-	tM := onetimetoken.NewTokenManager(db, userRepo) // One time token manager for working with token.
-	cS := chat.NewChatServer()                       // Chat server.
+	db := initDatabase()                                    // Database
+	userRepo := reposetories.NewUserRepo(db)                // User repository for working with user.
+	tM := onetimetoken.NewTokenManager(db, userRepo)        // One time token manager for working with token.
+	cMM := chat_message.NewChatMessageManager(db, userRepo) // Chat message manager.
+	cS := chat.NewChatServer(cMM)                           // Chat server.
 
 	r := mux.NewRouter()
 

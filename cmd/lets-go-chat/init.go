@@ -2,15 +2,16 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/vetal4ik10/lets-go-chat/configs"
 	"log"
 )
 
-func main() {
+func firstInitDatabase() {
 	// Init database.
 	dataSoutceName := configs.GetPostgresUrl()
-	db, err := sql.Open("postgres", dataSoutceName)
+	_, err := sql.Open("postgres", dataSoutceName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -25,8 +26,15 @@ func main() {
 		"CREATE TABLE token (" +
 		"uid varchar(60) NOT NULL, " +
 		"secret varchar(60) NOT NULL" +
+		");"
+	create += "DROP TABLE IF exists chat_message;" +
+		"CREATE TABLE chat_message (" +
+		"uid varchar(60) NOT NULL, " +
+		"text varchar NOT NULL, " +
+		"\"create\" timestamp NOT NULL" +
 		")"
-	_, err = db.Query(create)
+	fmt.Println(create)
+	//_, err = db.Query(create)
 
 	if err != nil {
 		log.Fatal(err)
