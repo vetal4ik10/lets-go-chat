@@ -1,0 +1,163 @@
+basePath: /api/v1
+definitions:
+  handlers.ActiveUsersResponse:
+    properties:
+      count:
+        type: integer
+    type: object
+  handlers.CreateUserRequest:
+    properties:
+      password:
+        type: string
+      userName:
+        type: string
+    type: object
+  handlers.CreateUserResponse:
+    properties:
+      id:
+        type: string
+      userName:
+        type: string
+    type: object
+  handlers.LoginUserRequest:
+    properties:
+      password:
+        type: string
+      userName:
+        type: string
+    type: object
+  handlers.LoginUserResonse:
+    properties:
+      url:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Just a simple chat service
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Fancy Golang chat
+  version: "1.0"
+paths:
+  /chat/ws.rtm.start:
+    get:
+      consumes:
+      - text/html
+      parameters:
+      - description: One time token for a loged user
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: Html page witch chat
+          schema:
+            type: string
+      summary: Endpoint to start real time chat
+      tags:
+      - chat
+  /user:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Created user object
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: user created
+          schema:
+            $ref: '#/definitions/handlers.CreateUserResponse'
+        "400":
+          description: Bad request, empty username or password
+          schema:
+            type: string
+        "500":
+          description: user name should contain at least 4 chars|user password should
+            contain at least 8 chars
+          schema:
+            type: string
+      summary: Register (create) user
+      tags:
+      - users
+  /user/active:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successful operation, returns number of active users
+          schema:
+            $ref: '#/definitions/handlers.ActiveUsersResponse'
+      summary: Number of active users in a chat
+      tags:
+      - chat
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User credendials
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: successful operation, returns link to join chat
+          schema:
+            $ref: '#/definitions/handlers.LoginUserResonse'
+        "400":
+          description: Bad request, empty username or password|User name or password
+            is incorrect.
+          schema:
+            type: string
+      summary: Logs user into the system
+      tags:
+      - users
+  /ws:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: One time token for a logged user
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "100":
+          description: Upgrade to websocket protocol
+        "400":
+          description: Token is required|Token is not valid
+          schema:
+            type: string
+      summary: Endpoint to start real time chat
+      tags:
+      - chat
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

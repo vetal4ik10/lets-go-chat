@@ -18,16 +18,44 @@ func NewChatHandlers(tm onetimetoken.TokenManager, ch chat.ChatServer) *chatHand
 	return &chatHandlers{tm, ch}
 }
 
+// ChatStart
+// @Summary  Endpoint to start real time chat
+// @Tags     chat
+// @Accept   html
+// @Produce  html
+// @Param    token  query     string  true  "One time token for a loged user"
+// @Success  200    {string}  string  "Html page witch chat"
+// @Router   /chat/ws.rtm.start [get]
 func (cH *chatHandlers) ChatStart(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	http.ServeFile(w, r, "home.html")
 }
 
-func (cH *chatHandlers) ChatActiveUsers(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]int{"count": cH.cS.GetActiveUsers()})
+type ActiveUsersResponse struct {
+	Count int `json:"count"`
 }
 
+// ChatActiveUsers
+// @Summary  Number of active users in a chat
+// @Tags     chat
+// @Accept   json
+// @Produce  json
+// @Success  200  {object}  handlers.ActiveUsersResponse  "successful operation, returns number of active users"
+// @Router   /user/active [get]
+func (cH *chatHandlers) ChatActiveUsers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(ActiveUsersResponse{Count: cH.cS.GetActiveUsers()})
+}
+
+// ChatConnect
+// @Summary  Endpoint to start real time chat
+// @Tags     chat
+// @Accept   json
+// @Produce  json
+// @Param    token  query  string  true  "One time token for a logged user"
+// @Success  100    "Upgrade to websocket protocol"
+// @Failure  400    {string}  string  "Token is required|Token is not valid"
+// @Router   /ws [get]
 func (cH *chatHandlers) ChatConnect(w http.ResponseWriter, r *http.Request) {
 	secret := r.URL.Query().Get("token")
 	if secret == "" {

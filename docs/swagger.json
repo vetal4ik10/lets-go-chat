@@ -1,0 +1,249 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Just a simple chat service",
+        "title": "Fancy Golang chat",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/chat/ws.rtm.start": {
+            "get": {
+                "consumes": [
+                    "text/html"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Endpoint to start real time chat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "One time token for a loged user",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Html page witch chat",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Register (create) user",
+                "parameters": [
+                    {
+                        "description": "Created user object",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "user created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CreateUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, empty username or password",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "user name should contain at least 4 chars|user password should contain at least 8 chars",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/active": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Number of active users in a chat",
+                "responses": {
+                    "200": {
+                        "description": "successful operation, returns number of active users",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ActiveUsersResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/login": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Logs user into the system",
+                "parameters": [
+                    {
+                        "description": "User credendials",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LoginUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "successful operation, returns link to join chat",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LoginUserResonse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, empty username or password|User name or password is incorrect.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/ws": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Endpoint to start real time chat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "One time token for a logged user",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "100": {
+                        "description": "Upgrade to websocket protocol"
+                    },
+                    "400": {
+                        "description": "Token is required|Token is not valid",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handlers.ActiveUsersResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.CreateUserRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CreateUserResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.LoginUserRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.LoginUserResonse": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
+        }
+    }
+}
