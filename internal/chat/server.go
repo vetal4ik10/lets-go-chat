@@ -5,15 +5,15 @@ import (
 	"github.com/vetal4ik10/lets-go-chat/internal/chat_message"
 )
 
-type chatServer struct {
+type ChatServer struct {
 	clients         map[ChatClient]bool
 	send            chan chat_message.ChatMessage
 	clientConnect   chan ChatClient
 	closeConnection chan ChatClient
-	messageManager  chat_message.ChatMessageManager
+	messageManager  *chat_message.ChatMessageManager
 }
 
-type ChatServer interface {
+type ChatServerInterface interface {
 	Run()
 	ClientConnect(c ChatClient)
 	SendMessage(m chat_message.ChatMessage)
@@ -21,17 +21,19 @@ type ChatServer interface {
 	GetActiveUsers() int
 }
 
-func NewChatServer(mM chat_message.ChatMessageManager) *chatServer {
-	return &chatServer{
+func NewChatServer(mM *chat_message.ChatMessageManager) *ChatServer {
+	cS := &ChatServer{
 		clients:         make(map[ChatClient]bool),
 		send:            make(chan chat_message.ChatMessage),
 		clientConnect:   make(chan ChatClient),
 		closeConnection: make(chan ChatClient),
 		messageManager:  mM,
 	}
+	go cS.Run()
+	return cS
 }
 
-func (s *chatServer) Run() {
+func (s *ChatServer) Run() {
 	for {
 		select {
 		case m := <-s.send:
@@ -54,18 +56,18 @@ func (s *chatServer) Run() {
 	}
 }
 
-func (s *chatServer) ClientConnect(c ChatClient) {
+func (s *ChatServer) ClientConnect(c ChatClient) {
 	s.clientConnect <- c
 }
 
-func (s *chatServer) SendMessage(m chat_message.ChatMessage) {
+func (s *ChatServer) SendMessage(m chat_message.ChatMessage) {
 	s.send <- m
 }
 
-func (s *chatServer) CloseConnection(c ChatClient) {
+func (s *ChatServer) CloseConnection(c ChatClient) {
 	s.closeConnection <- c
 }
 
-func (s *chatServer) GetActiveUsers() int {
+func (s *ChatServer) GetActiveUsers() int {
 	return len(s.clients)
 }

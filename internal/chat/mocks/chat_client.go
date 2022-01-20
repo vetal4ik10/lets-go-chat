@@ -38,7 +38,7 @@ func (_m *ChatClient) GetConnection() *websocket.Conn {
 }
 
 // Reader provides a mock function with given fields: s
-func (_m *ChatClient) Reader(s chat.ChatServer) {
+func (_m *ChatClient) Reader(s chat.ChatServerInterface) {
 	_m.Called(s)
 }
 

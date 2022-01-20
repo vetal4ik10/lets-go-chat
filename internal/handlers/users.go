@@ -11,11 +11,12 @@ import (
 )
 
 type UserHandlers struct {
-	repo reposetories.UserRepo
+	repo *reposetories.UserRepo
+	tM   *onetimetoken.TokenManager
 }
 
-func NewUserHandlers(repo reposetories.UserRepo) *UserHandlers {
-	return &UserHandlers{repo}
+func NewUserHandlers(repo *reposetories.UserRepo, tM *onetimetoken.TokenManager) *UserHandlers {
+	return &UserHandlers{repo, tM}
 }
 
 func (uH *UserHandlers) validateUser(user *CreateUserRequest) error {
@@ -35,7 +36,7 @@ type CreateUserRequest struct {
 }
 
 type CreateUserResponse struct {
-	Id string `json:"id"`
+	Id       string `json:"id"`
 	UserName string `json:"userName"`
 }
 
@@ -102,7 +103,7 @@ type LoginUserResonse struct {
 // @Success  201      {object}  handlers.LoginUserResonse  true  "successful operation, returns link to join chat"
 // @Failure  400      {string}  string                     "Bad request, empty username or password|User name or password is incorrect."
 // @Router   /user/login [post]
-func (uH *UserHandlers) Login(tM onetimetoken.TokenManager, w http.ResponseWriter, r *http.Request) {
+func (uH *UserHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	var loginRequest LoginUserRequest
 
 	// Parse post body.
@@ -123,7 +124,7 @@ func (uH *UserHandlers) Login(tM onetimetoken.TokenManager, w http.ResponseWrite
 	w.Header().Set("X-Rate-Limit", "10")
 	w.Header().Set("X-Expires-After", "10")
 
-	t, _ := tM.NewToken(user)
+	t, _ := uH.tM.NewToken(user)
 	response := LoginUserResonse{Url: "/chat/ws.rtm.start?token=" + t.GetSecret()}
 	json.NewEncoder(w).Encode(response)
 }

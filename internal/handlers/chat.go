@@ -9,13 +9,13 @@ import (
 	"net/http"
 )
 
-type chatHandlers struct {
-	tM onetimetoken.TokenManager
-	cS chat.ChatServer
+type ChatHandlers struct {
+	tM *onetimetoken.TokenManager
+	cS *chat.ChatServer
 }
 
-func NewChatHandlers(tm onetimetoken.TokenManager, ch chat.ChatServer) *chatHandlers {
-	return &chatHandlers{tm, ch}
+func NewChatHandlers(tm *onetimetoken.TokenManager, ch *chat.ChatServer) *ChatHandlers {
+	return &ChatHandlers{tm, ch}
 }
 
 // ChatStart
@@ -26,7 +26,7 @@ func NewChatHandlers(tm onetimetoken.TokenManager, ch chat.ChatServer) *chatHand
 // @Param    token  query     string  true  "One time token for a loged user"
 // @Success  200    {string}  string  "Html page witch chat"
 // @Router   /chat/ws.rtm.start [get]
-func (cH *chatHandlers) ChatStart(w http.ResponseWriter, r *http.Request) {
+func (cH *ChatHandlers) ChatStart(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	http.ServeFile(w, r, "home.html")
 }
@@ -42,7 +42,7 @@ type ActiveUsersResponse struct {
 // @Produce  json
 // @Success  200  {object}  handlers.ActiveUsersResponse  "successful operation, returns number of active users"
 // @Router   /user/active [get]
-func (cH *chatHandlers) ChatActiveUsers(w http.ResponseWriter, r *http.Request) {
+func (cH *ChatHandlers) ChatActiveUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(ActiveUsersResponse{Count: cH.cS.GetActiveUsers()})
 }
@@ -56,7 +56,7 @@ func (cH *chatHandlers) ChatActiveUsers(w http.ResponseWriter, r *http.Request) 
 // @Success  100    "Upgrade to websocket protocol"
 // @Failure  400    {string}  string  "Token is required|Token is not valid"
 // @Router   /ws [get]
-func (cH *chatHandlers) ChatConnect(w http.ResponseWriter, r *http.Request) {
+func (cH *ChatHandlers) ChatConnect(w http.ResponseWriter, r *http.Request) {
 	secret := r.URL.Query().Get("token")
 	if secret == "" {
 		ErrorResponse(w, "Token is required", http.StatusBadRequest)

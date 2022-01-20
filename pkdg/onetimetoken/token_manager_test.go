@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func getTestTokenManager(db *sql.DB) TokenManager {
+func getTestTokenManager(db *sql.DB) TokenManagerInterface {
 	userRepo := new(urMoks.UserRepo)
 	userRepo.On("GetByUid", "test").Return(&models.User{
 		Uid:      "test",
