@@ -36,12 +36,12 @@
                     appendLog(item);
                 };
                 conn.onmessage = function (evt) {
-                    var messages = evt.data.split('\n');
-                    for (var i = 0; i < messages.length; i++) {
-                        var item = document.createElement("div");
-                        item.innerText = messages[i];
-                        appendLog(item);
-                    }
+                    let message = JSON.parse(evt.data)
+                    let item = document.createElement("div");
+                    item.innerHTML = "<span>[" + message.time + "]</span>"
+                        + "<span>" + message.user + ":</span>"
+                        + "<span>" + message.text + "</span>"
+                    appendLog(item);
                 };
             } else {
                 var item = document.createElement("div");

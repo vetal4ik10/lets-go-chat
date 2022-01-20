@@ -6,7 +6,7 @@ import (
 
 // GetPostgresUrl get database connection url.
 func GetPostgresUrl() string {
-	url := os.Getenv("DATABASE_URL")
+	url := os.Getenv("HEROKU_POSTGRESQL_RED_URL")
 	if url == "" {
 		url = "user=postgres password=secret dbname=lets_go_chat sslmode=disable"
 	}

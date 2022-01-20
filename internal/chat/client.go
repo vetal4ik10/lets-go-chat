@@ -2,6 +2,7 @@ package chat
 
 import (
 	"github.com/gorilla/websocket"
+	"github.com/vetal4ik10/lets-go-chat/internal/chat_message"
 	"github.com/vetal4ik10/lets-go-chat/pkdg/onetimetoken"
 	"log"
 )
@@ -39,7 +40,9 @@ func (c *chatClient) Reader(s ChatServer) {
 			log.Println(err)
 			break
 		}
-		s.SendMessage(m)
+		u := c.getToken().GetUser()
+		cm := chat_message.NewChatMessage(u, m)
+		s.SendMessage(cm)
 	}
 }
 
