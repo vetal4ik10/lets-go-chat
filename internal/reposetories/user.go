@@ -7,21 +7,21 @@ import (
 	"github.com/vetal4ik10/lets-go-chat/internal/models"
 )
 
-type userRepo struct {
+type UserRepo struct {
 	db *sql.DB
 }
 
-type UserRepo interface {
+type UserRepoInterface interface {
 	Create(user *models.User) error
 	GetByUserName(username string) (*models.User, error)
 	GetByUid(uid string) (*models.User, error)
 }
 
-func NewUserRepo(db *sql.DB) *userRepo {
-	return &userRepo{db: db}
+func NewUserRepo(db *sql.DB) *UserRepo {
+	return &UserRepo{db: db}
 }
 
-func (uR *userRepo) Create(user *models.User) error {
+func (uR *UserRepo) Create(user *models.User) error {
 	user.Password, _ = hasher.HashPassword(user.Password)
 	uid := uuid.New().String()
 	sqlStatement := `INSERT INTO users (uid, name, pass)
@@ -34,7 +34,7 @@ func (uR *userRepo) Create(user *models.User) error {
 	return nil
 }
 
-func (uR *userRepo) GetByUserName(username string) (*models.User, error) {
+func (uR *UserRepo) GetByUserName(username string) (*models.User, error) {
 	sqlStatement := "SELECT uid, name, pass FROM users WHERE name=$1"
 	rows, err := uR.db.Query(sqlStatement, username)
 	if err != nil {
@@ -52,7 +52,7 @@ func (uR *userRepo) GetByUserName(username string) (*models.User, error) {
 	return &user, err
 }
 
-func (uR *userRepo) GetByUid(uid string) (*models.User, error) {
+func (uR *UserRepo) GetByUid(uid string) (*models.User, error) {
 	sqlStatement := "SELECT uid, name, pass FROM users WHERE uid=$1"
 	rows, err := uR.db.Query(sqlStatement, uid)
 	if err != nil {

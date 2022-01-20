@@ -13,10 +13,10 @@ type Token interface {
 type token struct {
 	user   *models.User
 	secret string
-	tM     TokenManager
+	tM     TokenManagerInterface
 }
 
-func NewToken(user *models.User, secret string, tM TokenManager) *token {
+func NewToken(user *models.User, secret string, tM TokenManagerInterface) *token {
 	return &token{user, secret, tM}
 }
 

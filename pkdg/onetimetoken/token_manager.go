@@ -7,23 +7,23 @@ import (
 	"github.com/vetal4ik10/lets-go-chat/internal/reposetories"
 )
 
-type TokenManager interface {
+type TokenManagerInterface interface {
 	InitToken(s string) (Token, error)
 	NewToken(u *models.User) (Token, error)
 	Verified(t Token) bool
 	Remove(t Token) error
 }
 
-type tokenManager struct {
+type TokenManager struct {
 	db       *sql.DB
-	userRepo reposetories.UserRepo
+	userRepo *reposetories.UserRepo
 }
 
-func NewTokenManager(db *sql.DB, userRepo reposetories.UserRepo) *tokenManager {
-	return &tokenManager{db, userRepo}
+func NewTokenManager(db *sql.DB, userRepo *reposetories.UserRepo) *TokenManager {
+	return &TokenManager{db, userRepo}
 }
 
-func (tM *tokenManager) InitToken(s string) (Token, error) {
+func (tM *TokenManager) InitToken(s string) (Token, error) {
 	sqlStatement := "SELECT uid, secret FROM token WHERE secret=$1"
 	rows, err := tM.db.Query(sqlStatement, s)
 	if err != nil {
@@ -43,7 +43,7 @@ func (tM *tokenManager) InitToken(s string) (Token, error) {
 	return &token{u, s, tM}, nil
 }
 
-func (tM *tokenManager) NewToken(u *models.User) (Token, error) {
+func (tM *TokenManager) NewToken(u *models.User) (Token, error) {
 	s := uuid.New().String()
 	sqlStatement := `INSERT INTO token (uid, secret) VALUES ($1, $2)`
 	_, err := tM.db.Exec(sqlStatement, u.Uid, s)
@@ -53,7 +53,7 @@ func (tM *tokenManager) NewToken(u *models.User) (Token, error) {
 	return &token{user: u, secret: s, tM: tM}, nil
 }
 
-func (tM *tokenManager) Verified(t Token) bool {
+func (tM *TokenManager) Verified(t Token) bool {
 	sqlStatement := "SELECT uid FROM token WHERE uid=$1 AND secret=$2"
 	rows, err := tM.db.Query(sqlStatement, t.GetUser().Uid, t.GetSecret())
 	defer rows.Close()
@@ -71,7 +71,7 @@ func (tM *tokenManager) Verified(t Token) bool {
 	return exists != ""
 }
 
-func (tM *tokenManager) Remove(t Token) error {
+func (tM *TokenManager) Remove(t Token) error {
 	sqlStatement := "DELETE FROM token WHERE secret=$1"
 	_, err := tM.db.Exec(sqlStatement, t.GetSecret())
 	if err != nil {

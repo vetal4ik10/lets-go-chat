@@ -5,12 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"github.com/vetal4ik10/lets-go-chat/configs"
-	"github.com/vetal4ik10/lets-go-chat/internal/chat"
-	"github.com/vetal4ik10/lets-go-chat/internal/chat_message"
-	"github.com/vetal4ik10/lets-go-chat/internal/handlers"
-	"github.com/vetal4ik10/lets-go-chat/internal/reposetories"
 	"github.com/vetal4ik10/lets-go-chat/pkdg/middlewares"
-	"github.com/vetal4ik10/lets-go-chat/pkdg/onetimetoken"
 	"log"
 	"net/http"
 )
@@ -26,28 +21,34 @@ func initDatabase() *sql.DB {
 	return db
 }
 
-func main() {
-	// Dependencies.
-	db := initDatabase()                                    // Database
-	userRepo := reposetories.NewUserRepo(db)                // User repository for working with user.
-	tM := onetimetoken.NewTokenManager(db, userRepo)        // One time token manager for working with token.
-	cMM := chat_message.NewChatMessageManager(db, userRepo) // Chat message manager.
-	cS := chat.NewChatServer(cMM)                           // Chat server.
+// @title           Fancy Golang chat
+// @version         1.0
+// @description     Just a simple chat service
+// @termsOfService  http://swagger.io/terms/
 
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.basic  BasicAuth
+func main() {
 	r := mux.NewRouter()
 
 	// Init user handlers.
-	userH := handlers.NewUserHandlers(userRepo)
+	userH := InitializeUserHandlers()
 	r.Use(middlewares.RequestLoggingHandler)
 	r.Use(middlewares.RequestErrorLoggingHandler)
 	r.HandleFunc("/user", userH.UserCreate).Methods(http.MethodPost)
-	r.HandleFunc("/user/login", func(w http.ResponseWriter, r *http.Request) {
-		userH.Login(tM, w, r)
-	}).Methods(http.MethodPost)
+	r.HandleFunc("/user/login", userH.Login).Methods(http.MethodPost)
 
 	// Init chat handlers.
-	cH := handlers.NewChatHandlers(tM, cS)
-	go cS.Run()
+	cH := InitializeChatHandlers()
 	r.HandleFunc("/chat/ws.rtm.start", cH.ChatStart).Methods(http.MethodGet)
 	r.HandleFunc("/user/active", cH.ChatActiveUsers).Methods(http.MethodGet)
 	r.HandleFunc("/ws", cH.ChatConnect).Queries("token", "{token}").Methods(http.MethodGet)

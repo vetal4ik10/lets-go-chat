@@ -15,7 +15,7 @@ type chatClient struct {
 type ChatClient interface {
 	GetConnection() *websocket.Conn
 	getToken() onetimetoken.Token
-	Reader(s ChatServer)
+	Reader(s ChatServerInterface)
 	Close()
 }
 
@@ -32,7 +32,7 @@ func (c *chatClient) getToken() onetimetoken.Token {
 }
 
 // Reader to fetch message from connection and send to server.
-func (c *chatClient) Reader(s ChatServer) {
+func (c *chatClient) Reader(s ChatServerInterface) {
 	for {
 		_, m, err := c.conn.ReadMessage()
 		if err != nil {

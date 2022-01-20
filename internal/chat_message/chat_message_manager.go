@@ -6,21 +6,21 @@ import (
 	"time"
 )
 
-type ChatMessageManager interface {
+type ChatMessageManagerInterface interface {
 	SaveMessage(cM ChatMessage) (ChatMessage, error)
 	LoadAllMessages() []chatMessage
 }
 
-type chatMessageManager struct {
+type ChatMessageManager struct {
 	db       *sql.DB
-	userRepo reposetories.UserRepo
+	userRepo *reposetories.UserRepo
 }
 
-func NewChatMessageManager(db *sql.DB, userRepo reposetories.UserRepo) *chatMessageManager {
-	return &chatMessageManager{db, userRepo}
+func NewChatMessageManager(db *sql.DB, userRepo *reposetories.UserRepo) *ChatMessageManager {
+	return &ChatMessageManager{db, userRepo}
 }
 
-func (cMM *chatMessageManager) SaveMessage(cM ChatMessage) (ChatMessage, error) {
+func (cMM *ChatMessageManager) SaveMessage(cM ChatMessage) (ChatMessage, error) {
 	mTime := cM.GetTime()
 	if mTime == nil {
 		now := time.Now()
@@ -35,7 +35,7 @@ func (cMM *chatMessageManager) SaveMessage(cM ChatMessage) (ChatMessage, error) 
 	return &chatMessage{cM.GetUser(), cM.GetText(), mTime}, nil
 }
 
-func (cMM *chatMessageManager) LoadAllMessages() []chatMessage {
+func (cMM *ChatMessageManager) LoadAllMessages() []chatMessage {
 	messages := make([]chatMessage, 0)
 
 	sqlStatement := `SELECT "uid", "text", "create" FROM "chat_message" ORDER BY "create" ASC`
