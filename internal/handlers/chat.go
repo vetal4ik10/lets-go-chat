@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	"github.com/vetal4ik10/lets-go-chat/internal/chat"
@@ -75,8 +76,9 @@ func (cH *ChatHandlers) ChatConnect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c := chat.NewChatClient(conn, token)
+	ctx := context.WithValue(r.Context(), "token", token)
 	cH.cS.ClientConnect(c)
-	go c.Reader(cH.cS)
+	go c.Reader(ctx, cH.cS)
 }
 
 var upgrader = websocket.Upgrader{

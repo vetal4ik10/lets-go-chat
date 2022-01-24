@@ -1,10 +1,12 @@
 package chat
 
 import (
+	"context"
 	"github.com/gorilla/websocket"
 	"github.com/vetal4ik10/lets-go-chat/internal/chat_message"
 	"github.com/vetal4ik10/lets-go-chat/pkdg/onetimetoken"
 	"log"
+	"runtime/trace"
 )
 
 type chatClient struct {
@@ -15,7 +17,7 @@ type chatClient struct {
 type ChatClient interface {
 	GetConnection() *websocket.Conn
 	getToken() onetimetoken.Token
-	Reader(s ChatServerInterface)
+	Reader(ctx context.Context, s ChatServerInterface)
 	Close()
 }
 
@@ -32,7 +34,13 @@ func (c *chatClient) getToken() onetimetoken.Token {
 }
 
 // Reader to fetch message from connection and send to server.
-func (c *chatClient) Reader(s ChatServerInterface) {
+func (c *chatClient) Reader(ctx context.Context, s ChatServerInterface) {
+	ctx, task := trace.NewTask(ctx, "readMessages")
+	defer func() {
+		s.CloseConnection(c)
+		c.conn.Close()
+		task.End()
+	}()
 	for {
 		_, m, err := c.conn.ReadMessage()
 		if err != nil {
@@ -43,6 +51,7 @@ func (c *chatClient) Reader(s ChatServerInterface) {
 		u := c.getToken().GetUser()
 		cm := chat_message.NewChatMessage(u, m)
 		s.SendMessage(cm)
+		trace.Log(ctx, "getMessage", string(cm.GetText()))
 	}
 }
 
