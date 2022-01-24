@@ -8,6 +8,7 @@ import (
 	"github.com/vetal4ik10/lets-go-chat/pkdg/middlewares"
 	"log"
 	"net/http"
+	"net/http/pprof"
 )
 
 func initDatabase() *sql.DB {
@@ -39,6 +40,7 @@ func initDatabase() *sql.DB {
 // @securityDefinitions.basic  BasicAuth
 func main() {
 	r := mux.NewRouter()
+	AttachProfiler(r)
 
 	// Init user handlers.
 	userH := InitializeUserHandlers()
@@ -53,4 +55,18 @@ func main() {
 	r.HandleFunc("/user/active", cH.ChatActiveUsers).Methods(http.MethodGet)
 	r.HandleFunc("/ws", cH.ChatConnect).Queries("token", "{token}").Methods(http.MethodGet)
 	log.Fatal(http.ListenAndServe(":"+configs.GetServerPort(), r))
+}
+
+func AttachProfiler(router *mux.Router) {
+	router.HandleFunc("/debug/pprof/", pprof.Index)
+	router.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	router.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	router.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	router.HandleFunc("/debug/pprof/trace", pprof.Trace)
+
+	// Manually add support for paths linked to by index page at /debug/pprof/
+	router.Handle("/debug/pprof/goroutine", pprof.Handler("goroutine"))
+	router.Handle("/debug/pprof/heap", pprof.Handler("heap"))
+	router.Handle("/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
+	router.Handle("/debug/pprof/block", pprof.Handler("block"))
 }
